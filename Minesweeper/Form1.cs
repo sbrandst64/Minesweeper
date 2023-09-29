@@ -13,14 +13,15 @@ namespace Minesweeper
     public partial class Form1 : Form
     {
         static int spielfeldgrößeX = 20;
-        static int spielfeldgrößeY = 20;
+        static int spielfeldgrößeY = 10;
 
         Label[,] Feld = new Label[spielfeldgrößeX, spielfeldgrößeY];
         int feldabstand = 22;
        
-        int currentBombs = 35;
+        int currentBombs = 50;
         public Form1()
         {
+            int bombsNear = 0;
             InitializeComponent();
             
             var path = new System.Drawing.Drawing2D.GraphicsPath();
@@ -39,6 +40,7 @@ namespace Minesweeper
                     Feld[X, Y].Location = new System.Drawing.Point(X * feldabstand, Y * feldabstand);
                     Feld[X, Y].Size = new System.Drawing.Size(40, 40);
                     Feld[X, Y].Text = " ";
+                    Feld[X, Y].AccessibleDescription = "";
                     Feld[X, Y].TextAlign = ContentAlignment.BottomRight;
                     Feld[X, Y].Region = new Region(path);
                     Feld[X, Y].MouseClick += new MouseEventHandler(this.label1_Click);
@@ -49,14 +51,25 @@ namespace Minesweeper
                 }
             }
             place_Bombs();
+            for (int X = 0; X < spielfeldgrößeX; X++)
+            {
+                for (int Y = 0; Y < spielfeldgrößeY; Y++)
+                {
+                    if (Feld[X,Y].AccessibleDescription != "bomb")
+                    {
+                        bombsNear = checkNearBombs(X, Y);
+                        Feld[X, Y].AccessibleDescription = bombsNear.ToString();
+                    }
+
+                }
+            }
+
 
         }
 
         private void label1_Click(object sender, MouseEventArgs e)
         {
-            int sx = -1;
-            int sy = -1;
-            int bombsNear;
+            
           Label clickedField = sender as Label;
                 if (e.Button == MouseButtons.Left){
 
@@ -64,14 +77,19 @@ namespace Minesweeper
                 {
                     clickedField.BackColor = Color.White;
                     clickedField.ForeColor = Color.Blue;
-
-                    bombsNear = checkNearBombs(clickedField.Location.X/feldabstand, clickedField.Location.Y/feldabstand);
-                    clickedField.Text = bombsNear.ToString() + " ";
+                    clickedField.Text = clickedField.AccessibleDescription;
 
                 }
+                //Wenn 0 dann decke alle anliegenden Felder auf
+                if(clickedField.Text == "0")
+                {
+                    checkSurroundingZeros(clickedField.Location.X / feldabstand, clickedField.Location.Y / feldabstand);
+                }
+        
 
-                //wenn auf bombe gedrückt
-                if ((clickedField).AccessibleDescription=="bomb")
+
+                //check if Death
+                if (clickedField.AccessibleDescription=="bomb")
                 {
                     for (int X = 0; X < spielfeldgrößeX; X++)
                     {
@@ -89,6 +107,8 @@ namespace Minesweeper
                 }
             
                 }
+
+                //Place Bomb
             if (e.Button == MouseButtons.Right)
             {
                 if (clickedField.Text == "B")
@@ -104,6 +124,28 @@ namespace Minesweeper
             }
             checkIfWon();
         }
+
+        public void checkSurroundingZeros(int X, int Y)
+        {
+            for (int sx = -1; sx <= 1; sx++)
+            {
+                for (int sy = -1; sy <= 1; sy++)
+                {
+                    if (X + sx >= 0
+                       && X + sx < spielfeldgrößeX
+                       && Y + sy >= 0
+                       && Y + sy < spielfeldgrößeY)
+                    {
+                        checkNearBombs(X + sx, Y + sy);
+                        Feld[X + sx, Y + sy].BackColor = Color.White;
+                        Feld[X + sx, Y + sy].Text = Feld[X + sx, Y + sy].AccessibleDescription;
+                        
+                    }
+                }
+            }
+        }
+                
+    
         public void reset()
         {
             for (int X = 0; X < spielfeldgrößeX; X++)
@@ -164,6 +206,8 @@ namespace Minesweeper
                 if (Feld[bombX, bombY].Text == " ")
                 {
                     Feld[bombX, bombY].AccessibleDescription="bomb";
+                    Feld[bombX, bombY].BackColor = Color.Red;
+                    
                 }
                 else
                 {
