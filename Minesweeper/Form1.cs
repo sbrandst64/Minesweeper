@@ -51,6 +51,8 @@ namespace Minesweeper
                 }
             }
             place_Bombs();
+
+            //initialize all fields
             for (int X = 0; X < spielfeldgrößeX; X++)
             {
                 for (int Y = 0; Y < spielfeldgrößeY; Y++)
@@ -85,46 +87,59 @@ namespace Minesweeper
                 {
                     checkSurroundingZeros(clickedField.Location.X / feldabstand, clickedField.Location.Y / feldabstand);
                 }
-        
-
 
                 //check if Death
-                if (clickedField.AccessibleDescription=="bomb")
-                {
-                    for (int X = 0; X < spielfeldgrößeX; X++)
-                    {
-                        for (int Y = 0; Y < spielfeldgrößeY; Y++)
-                        {
-                            if(Feld[X,Y].AccessibleDescription == "bomb")
-                            {
-                                Feld[X, Y].BackColor = Color.Red;
-                                Feld[X, Y].Text = " ";
-                            }
-                        }
-                    }
-                            MessageBox.Show("Du host oag vergackt");
-                    reset();
-                }
-            
+                checkIfDeath(clickedField.Location.X / feldabstand, clickedField.Location.Y / feldabstand);
                 }
 
-                //Place Bomb
+                //Place flag
             if (e.Button == MouseButtons.Right)
             {
-                if (clickedField.Text == "B")
-                {
-                    clickedField.Text = " ";
-                    clickedField.BackColor = Color.Gray;
-                }
-                else
-                {
-                    clickedField.Text = "B";
-                    clickedField.BackColor = Color.Azure;
-                }
+                placeFlag(clickedField.Location.X / feldabstand, clickedField.Location.Y / feldabstand);
             }
             checkIfWon();
         }
+        public void placeFlag(int X,int Y)
+        {
 
+            if (Feld[X, Y].Text == "F")
+            {
+                if (Feld[X, Y].AccessibleDescription == "bomb")
+                {
+                    Feld[X, Y].BackColor = Color.Red;
+                    Feld[X, Y].Text = " ";
+                }
+                else
+                {
+                    Feld[X, Y].Text = " ";
+                    Feld[X, Y].BackColor = Color.Gray;
+                }
+            }
+            else
+            {
+                Feld[X, Y].Text = "F";
+                Feld[X, Y].BackColor = Color.Yellow;
+            }
+        }
+        public void checkIfDeath(int X , int Y)
+        {
+            if (Feld[X,Y].AccessibleDescription == "bomb")
+            {
+                for (int x = 0; x < spielfeldgrößeX; x++)
+                {
+                    for (int y = 0; y < spielfeldgrößeY; y++)
+                    {
+                        if (Feld[X, Y].AccessibleDescription == "bomb")
+                        {
+                            Feld[X, Y].BackColor = Color.Red;
+                            Feld[X, Y].Text = " ";
+                        }
+                    }
+                }
+                MessageBox.Show("Du host oag vergackt");
+                reset();
+            }
+        }
         public void checkSurroundingZeros(int X, int Y)
         {
             for (int sx = -1; sx <= 1; sx++)
@@ -165,9 +180,7 @@ namespace Minesweeper
             
         }
         public int checkNearBombs(int X,int Y)
-        {
-          
-                    
+        {                   
             int bombcounter = 0;
             for (int sx = -1; sx <= 1; sx++)
             {
