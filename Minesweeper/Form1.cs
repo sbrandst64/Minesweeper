@@ -17,7 +17,6 @@ namespace Minesweeper
 
         Label[,] Feld = new Label[spielfeldgrößeX, spielfeldgrößeY];
         int feldabstand = 22;
-       
         int currentBombs = 50;
         public Form1()
         {
@@ -99,26 +98,28 @@ namespace Minesweeper
             }
             checkIfWon();
         }
-        public void placeFlag(int X,int Y)
+        public void placeFlag(int X, int Y)
         {
-
-            if (Feld[X, Y].Text == "F")
+            if (Feld[X, Y].BackColor != Color.White)
             {
-                if (Feld[X, Y].AccessibleDescription == "bomb")
+                if (Feld[X, Y].Text == "F")
                 {
-                    Feld[X, Y].BackColor = Color.Red;
-                    Feld[X, Y].Text = " ";
+                    if (Feld[X, Y].AccessibleDescription == "bomb")
+                    {
+                        Feld[X, Y].BackColor = Color.Red;
+                        Feld[X, Y].Text = " ";
+                    }
+                    else
+                    {
+                        Feld[X, Y].Text = " ";
+                        Feld[X, Y].BackColor = Color.Gray;
+                    }
                 }
                 else
                 {
-                    Feld[X, Y].Text = " ";
-                    Feld[X, Y].BackColor = Color.Gray;
+                    Feld[X, Y].Text = "F";
+                    Feld[X, Y].BackColor = Color.Yellow;
                 }
-            }
-            else
-            {
-                Feld[X, Y].Text = "F";
-                Feld[X, Y].BackColor = Color.Yellow;
             }
         }
         public void checkIfDeath(int X , int Y)
@@ -142,6 +143,8 @@ namespace Minesweeper
         }
         public void checkSurroundingZeros(int X, int Y)
         {
+            var zerolist = new List<Tuple<int, int>>();
+            int zeroCounter = 0;
             for (int sx = -1; sx <= 1; sx++)
             {
                 for (int sy = -1; sy <= 1; sy++)
@@ -152,14 +155,25 @@ namespace Minesweeper
                        && Y + sy < spielfeldgrößeY)
                     {
                         checkNearBombs(X + sx, Y + sy);
+                        //speichere alle nuller in eine Liste
+                        if(Feld[X + sx, Y + sy].AccessibleDescription == "0")
+                        {
+                            zerolist.Add(new Tuple<int, int>(X+sx, Y+sy));
+
+                        }
                         Feld[X + sx, Y + sy].BackColor = Color.White;
                         Feld[X + sx, Y + sy].Text = Feld[X + sx, Y + sy].AccessibleDescription;
                         
                     }
                 }
             }
+            foreach(Tuple <int,int> oasch in zerolist)
+            {
+                checkSurroundingZeros(oasch.Item1, oasch.Item2);
+            }
         }
-                
+      
+     
     
         public void reset()
         {
